@@ -1,0 +1,8 @@
+{
+	"listen_port": 3000,
+	"rcon_host": "localhost" ,
+	"rcon_port": 30120,
+	"rcon_password": "FIVEM-RCON-PASSWORD" ,
+	"git_pull_path": "/PATH/TO/YOUR/CLONED-GITHUB-PROJECT",
+	"github_secret": "GITHUB-WEBHOOK-SECRET"
+}

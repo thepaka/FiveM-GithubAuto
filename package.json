@@ -1,0 +1,25 @@
+{
+  "name": "fivem-githubauto",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "author": "thepakamaster@free.fr",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thepaka/FiveM-GithubAuto.git"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.17.2",
+    "buffer-equal-constant-time": "^1.0.1",
+    "express": "^4.15.3",
+    "git-pull": "^0.1.0",
+    "rcon": "^1.0.3"
+  },
+  "devDependencies": {
+    "nodemon": "^1.11.0"
+  }
+}
