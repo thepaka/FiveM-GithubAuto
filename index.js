@@ -107,8 +107,8 @@ app.post('/webhook', function (req, res) {
 
             srv_refresh();
 
-            // todo : get AutoStartRessources from  config.git_pull_path + ' citmp-server.yml
-            //       and restart them
+            // todo : only restart the resource impacted by the commits
+
         }
     });
 })
