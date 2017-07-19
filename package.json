@@ -17,6 +17,7 @@
     "buffer-equal-constant-time": "^1.0.1",
     "express": "^4.15.3",
     "git-pull": "^0.1.0",
+    "js-yaml": "^3.9.0",
     "rcon": "^1.0.3"
   },
   "devDependencies": {
