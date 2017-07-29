@@ -2,7 +2,8 @@
 	"listen_port": 3000,
 	"github_secret": "GITHUB-WEBHOOK-SECRET",
 	"git_pull_path": "/PATH/TO/YOUR/CLONED-GITHUB-PROJECT",
-        "server_cfg_path": "PATH/TO/FIVEM-SERVER-CONFIG.yml",
+	"server_cfg_path": "PATH/TO/FIVEM-SERVER-CONFIG.yml",
+	"server_resources_path": "PATH/TO/FIVEM-SERVER-RESOURCES",
 	"rcon_host": "localhost",
 	"rcon_port": 30120 ,
 	"rcon_password": "FIVEM-RCON-PASSWORD"

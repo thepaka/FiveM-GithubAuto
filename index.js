@@ -6,7 +6,7 @@ const crypto       = require('crypto')
     , bufferEq     = require('buffer-equal-constant-time');
 const yaml = require('js-yaml')
     , fs = require('fs');
-
+const watch = require('node-watch')
 const app = express();
 
 process.env['LANG'] = 'POSIX';
@@ -19,9 +19,16 @@ if (config.server_cfg_path.startsWith('/')) {
 } else if (config.server_cfg_path != "" ) {
     f = config.git_pull_path + "/" + config.server_cfg_path;
 }
-
 console.log("using server config file : "+f);
 var srv_config = yaml.load(fs.readFileSync(f));
+
+var srv_resdir;
+if (config.server_resources_path.startsWith('/')) {
+    srv_resdir = config.server_resources_path;
+} else if (config.server_resources_path != "" ) {
+    srv_resdir = config.git_pull_path + "/" + config.server_resources_path;
+}
+console.log("using server resources dir : " + srv_resdir);
 
 if (typeof config.rcon_password === "boolean" && config.rcon_password) {
     config.rcon_password = srv_config.RconPassword;
@@ -70,8 +77,6 @@ app.get('/refresh', function (req, res) {
     srv_refresh();
 })
 
-
-
 app.post('/webhook', function (req, res) {
     console.log('post /webhook');
 
@@ -105,9 +110,7 @@ app.post('/webhook', function (req, res) {
                 return;
             }
 
-            srv_refresh();
-
-            // todo : only restart the resource impacted by the commits
+            //srv_refresh();
 
         }
     });
@@ -116,5 +119,79 @@ app.post('/webhook', function (req, res) {
 app.listen(config.listen_port, function () {
     console.log('App listening on port ' + config.listen_port)
 })
+
+var watcher = watch(srv_resdir, {
+	recursive: true,
+	filter: function (name) {
+		var fname = name.substr(name.lastIndexOf("/")+1);
+		return !/(^\.|~$)/.test(fname);
+	}
+}, function(evt, name) {
+	console.log('%s changed (%s).', name, evt);
+});
+
+watcher.on('change', function(evt, name) {
+	if (evt != "update") {
+		return;
+	}
+	find_resource(name);
+});
+
+var found_resources = [];
+var timer_resource = null;
+function find_resource(path) {
+	if (path == srv_resdir) {
+		//console.log("no resource found");
+		return;
+	}
+	fs.lstat(path, function(err, stats) {
+		if (err !== null) {
+			console.log(JSON.stringify(err, null, 4));
+			return;
+		}
+		var dpath = path.substr(0, path.lastIndexOf("/"));
+
+		if (stats.isDirectory()) {
+			//console.log(path + " is a directory in " + dpath);
+			if (fs.existsSync(path + "/__resource.lua")) {
+				var rname = path.substr(path.lastIndexOf("/")+1);
+				//console.log("Ressource is " + rname);
+				found_resources.push(rname);
+                if (timer_resource === null) {
+                    timer_resource = setTimeout(restart_resources, 3000);
+                }
+			} else {
+				find_resource(dpath)
+			}
+		} else if (stats.isFile()) {
+			//console.log(path + " is a file in " + dpath);
+			find_resource(dpath)
+		} else {
+			//console.log(path + " is not a file or directory")
+			return
+		}
+	});
+}
+
+function restart_resources() {
+	if (found_resources.length == 0) {
+        timer_resource = null;
+		return
+	}
+	var resources = found_resources.splice(0, found_resources.length);
+	resources = resources.filter(function(elem, pos) {
+		return resources.indexOf(elem) == pos;
+	});
+
+	console.log("Resources to restart : "  + JSON.stringify(resources , null, 4));
+    for (var ressource of resources) {
+        conn.send("restart " + ressource);
+    }
+    if ((found_resources.length != 0) && (timer_resource === null)) {
+        timer_resource = setTimeout(restart_resources, 3000);
+    } else {
+        timer_resource = null;
+    }
+}
 
 // vim: ts=4 sw=4 et
